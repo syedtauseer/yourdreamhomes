@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Home - Real Estate Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            600: '#d97706',
+                            700: '#b45309',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .bg-ambient { background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 50%, #f1f5f9 100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col custom-scrollbar">
+
+    <!-- Top Mode Indicator Banner -->
+    <div id="modeIndicatorBar" class="bg-slate-900 text-white px-4 py-2 text-xs flex justify-between items-center sticky top-0 z-50 border-b border-slate-800">
+        <div class="flex items-center space-x-2 max-w-7xl mx-auto w-full justify-between">
+            <div class="flex items-center space-x-2">
+                <span id="modeBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <i class="fa-solid fa-user-tag mr-1 text-[9px]"></i> Customer View
+                </span>
+                <span id="modeDescription" class="text-slate-300 hidden sm:inline text-[11px]">
+                    Direct owner properties • Prices in INR (₹)
+                </span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div id="customerSwitchBtn">
+                    <button onclick="openSecretLogin()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-1 rounded-md text-[11px] transition flex items-center shadow-sm">
+                        <i class="fa-solid fa-user-shield mr-1.5 text-emerald-200"></i> Owner Workspace
+                    </button>
+                </div>
+                <div id="ownerSwitchBtn" class="hidden flex items-center space-x-2">
+                    <span class="text-emerald-400 text-xs font-semibold hidden md:inline"><i class="fa-solid fa-circle-check text-green-400 mr-1"></i> Owner Mode Active</span>
+                    <button onclick="logoutOwner()" class="bg-red-600/90 hover:bg-red-600 text-white font-semibold px-3 py-1 rounded-md text-[11px] transition flex items-center shadow-sm">
+                        <i class="fa-solid fa-right-from-bracket mr-1.5"></i> Exit to Customer View
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="border-b border-slate-200 bg-white/95 backdrop-blur sticky top-[33px] z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="switchCustomerTab('browse')" ondblclick="openSecretLogin()">
+                    <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-house-chimney"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Your<span class="text-emerald-600">Home</span></span>
+                        <span class="block text-[9px] text-slate-400 font-bold tracking-widest uppercase">Verified Real Estate</span>
+                    </div>
+                </div>
+
+                <!-- Customer Mode Navigation -->
+                <nav id="customerNav" class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+                    <button onclick="switchCustomerTab('browse')" id="nav-c-browse" class="hover:text-emerald-600 transition-colors py-2 border-b-2 border-emerald-600 text-emerald-600 font-bold">
+                        <i class="fa-solid fa-compass mr-1.5"></i> Properties
+                    </button>
+                    <button onclick="switchCustomerTab('owner-profile')" id="nav-c-owner-profile" class="hover:text-emerald-600 transition-colors py-2 border-b-2 border-transparent">
+                        <i class="fa-solid fa-id-card mr-1.5"></i> Owner Details
+                    </button>
+                    <button onclick="switchCustomerTab('contact')" id="nav-c-contact" class="hover:text-emerald-600 transition-colors py-2 border-b-2 border-transparent">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i> Direct Contact
+                    </button>
+                </nav>
+
+                <!-- Owner Mode Header Indicator -->
+                <div id="ownerNavTitle" class="hidden md:flex items-center text-sm font-bold text-slate-800 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                    <i class="fa-solid fa-sliders text-emerald-600 mr-2"></i> Owner Control Dashboard
+                </div>
+
+                <!-- Quick Action Button -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="openLeadModal('General Inquiry', 'Enquiry from Header')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition shadow-md shadow-emerald-600/15 flex items-center">
+                        <i class="fa-solid fa-envelope mr-1.5"></i> Quick Inquiry
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- ==================== VIEW 1: CUSTOMER PORTAL VIEW ==================== -->
+        <div id="customerView" class="w-full">
+            
+            <!-- Tab C1: Browse Properties -->
+            <section id="ctab-browse" class="ctab-content py-6 sm:py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                    <div class="bg-ambient border border-emerald-100 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden">
+                        <div class="max-w-2xl">
+                            <span class="inline-block text-emerald-800 bg-emerald-100/80 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wider">
+                                <i class="fa-solid fa-shield-halved mr-1"></i> Direct Owner Listings
+                            </span>
+                            <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-2 sm:mb-3">
+                                Find Your Dream Property in <span class="text-emerald-600">Indian Rupees (₹)</span>
+                            </h1>
+                            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                Zero brokerage. Deal directly with property owner <strong id="heroOwnerName" class="text-slate-800">--</strong> across top prime locations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters Bar -->
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Search Keyword</label>
+                                <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="Location, Villa, BHK..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Property Type</label>
+                                <select id="filterType" onchange="applyFilters()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                    <option value="ALL">All Property Types</option>
+                                    <option value="Villa">Villa</option>
+                                    <option value="Apartment">Apartment</option>
+                                    <option value="Penthouse">Penthouse</option>
+                                    <option value="Plot">Plot / Land</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Purpose</label>
+                                <select id="filterPurpose" onchange="applyFilters()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                    <option value="ALL">Buy or Rent</option>
+                                    <option value="Sale">For Sale</option>
+                                    <option value="Rent">For Rent</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Budget Range (₹ INR)</label>
+                                <select id="filterBudget" onchange="applyFilters()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                    <option value="ALL">Any Budget</option>
+                                    <option value="0-5000000">Under ₹50 Lakhs</option>
+                                    <option value="5000000-15000000">₹50 Lakhs - ₹1.5 Crore</option>
+                                    <option value="15000000-50000000">₹1.5 Crore - ₹5 Crore</option>
+                                    <option value="50000000-999999999">Above ₹5 Crore</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Property Grid -->
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">Available Listings (<span id="propertyCount">0</span>)</h2>
+                        <span class="text-xs text-slate-400 font-medium"><i class="fa-solid fa-indian-rupee-sign text-emerald-600 mr-1"></i> INR Pricing</span>
+                    </div>
+                    <div id="customerPropertyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic Property Cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab C2: Customer View - About Owner Details -->
+            <section id="ctab-owner-profile" class="ctab-content py-8 sm:py-12 hidden">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+                        <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                            <img id="pubOwnerPic" src="" alt="Owner Photo" class="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover border-4 border-emerald-100 shadow-md">
+                            <div class="flex-1 text-center md:text-left">
+                                <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                                    <i class="fa-solid fa-user-check mr-1"></i> Verified Property Owner
+                                </span>
+                                <h2 id="pubOwnerName" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">--</h2>
+                                <p class="text-slate-500 text-xs mb-4"><i class="fa-solid fa-certificate text-emerald-600 mr-1"></i> Direct Deals • No Brokerage Fees</p>
+                                <p id="pubOwnerBio" class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">--</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-phone"></i>
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Contact Phone</span>
+                                            <a id="pubOwnerPhoneLink" href="#" class="text-xs sm:text-sm font-bold text-slate-800 hover:text-emerald-600 truncate block">--</a>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-envelope"></i>
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <span class="block text-[10px] text-slate-400 uppercase font-bold">Email Address</span>
+                                            <span id="pubOwnerEmail" class="text-xs sm:text-sm font-bold text-slate-800 truncate block">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                                    <button onclick="openLeadModal('Direct Phone Call', 'Owner Profile Page')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-3 rounded-xl transition shadow-md flex items-center">
+                                        <i class="fa-solid fa-phone-volume mr-2"></i> Request Phone Call
+                                    </button>
+                                    <button onclick="openWhatsAppDirect()" class="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs px-5 py-3 rounded-xl transition shadow-md flex items-center">
+                                        <i class="fa-brands fa-whatsapp text-base mr-2"></i> WhatsApp Owner
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab C3: Customer View - Direct Contact -->
+            <section id="ctab-contact" class="ctab-content py-8 sm:py-12 hidden">
+                <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-1">Direct Contact Form</h2>
+                        <p class="text-xs text-slate-500 mb-6">Submit your inquiry directly to the owner. Your details will be privately captured in the owner workspace.</p>
+                        <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name *</label>
+                                    <input type="text" id="contactName" required placeholder="Full Name" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile / WhatsApp Number *</label>
+                                    <input type="tel" id="contactPhone" required placeholder="+91 98765 43210" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                                <input type="email" id="contactEmail" placeholder="email@domain.com" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Message / Requirements</label>
+                                <textarea id="contactMessage" rows="4" placeholder="Detail your property preferences or query..." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                                <i class="fa-solid fa-paper-plane mr-1.5"></i> Submit Inquiry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== VIEW 2: OWNER WORKSPACE DASHBOARD ==================== -->
+        <div id="ownerWorkspaceView" class="w-full hidden min-h-[85vh] bg-slate-100/70 py-6 sm:py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Dashboard Welcome Banner -->
+                <div class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 mb-6 shadow-md border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-2">
+                            Protected Owner Workspace
+                        </span>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Owner Control Dashboard</h1>
+                        <p class="text-slate-400 text-xs mt-1">Manage listings, view captured customer leads, and update profile settings.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="openAddPropertyModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-md flex items-center">
+                            <i class="fa-solid fa-plus-circle mr-2 text-sm"></i> Add New Property
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Tab Navigation Bar -->
+                <div class="flex flex-wrap gap-2 border-b border-slate-200 mb-6 bg-white p-1.5 rounded-2xl shadow-sm border">
+                    <button onclick="switchOwnerTab('overview')" id="otab-overview" class="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white transition flex items-center">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Overview & Stats
+                    </button>
+                    <button onclick="switchOwnerTab('leads')" id="otab-leads" class="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-emerald-600 transition flex items-center">
+                        <i class="fa-solid fa-users mr-2"></i> Captured Leads (<span id="dashLeadBadge">0</span>)
+                    </button>
+                    <button onclick="switchOwnerTab('listings')" id="otab-listings" class="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-emerald-600 transition flex items-center">
+                        <i class="fa-solid fa-boxes-stacked mr-2"></i> Manage Listings (<span id="dashPropBadge">0</span>)
+                    </button>
+                    <button onclick="switchOwnerTab('settings')" id="otab-settings" class="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-emerald-600 transition flex items-center">
+                        <i class="fa-solid fa-shield-halved mr-2"></i> Profile & Password
+                    </button>
+                </div>
+
+                <!-- Owner Admin Tab 1: Overview Stats -->
+                <div id="ocontent-overview" class="ocontent-block space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-house"></i>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-400">Total Listings</span>
+                                <span class="text-2xl font-black text-slate-900" id="statTotalProps">0</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-100 text-green-700 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-400">Captured Leads</span>
+                                <span class="text-2xl font-black text-slate-900" id="statTotalLeads">0</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-tag"></i>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-400">For Sale</span>
+                                <span class="text-2xl font-black text-slate-900" id="statSaleProps">0</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-key"></i>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-400">For Rent</span>
+                                <span class="text-2xl font-black text-slate-900" id="statRentProps">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 text-sm mb-4">Quick Shortcuts</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="switchOwnerTab('listings'); openAddPropertyModal();" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                                <i class="fa-solid fa-plus text-emerald-600 mr-1.5"></i> Post Property Listing
+                            </button>
+                            <button onclick="switchOwnerTab('leads')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                                <i class="fa-solid fa-list text-slate-600 mr-1.5"></i> Review Customer Inquiries
+                            </button>
+                            <button onclick="switchOwnerTab('settings')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                                <i class="fa-solid fa-lock text-slate-600 mr-1.5"></i> Update Owner Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owner Admin Tab 2: Captured Customer Leads -->
+                <div id="ocontent-leads" class="ocontent-block hidden space-y-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                        <div class="relative flex-1 max-w-xs">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="leadSearch" oninput="renderLeadsTable()" placeholder="Search lead name or phone..." class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="exportLeadsCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center">
+                                <i class="fa-solid fa-file-csv text-green-600 mr-1.5 text-sm"></i> Export CSV
+                            </button>
+                            <button onclick="clearAllLeads()" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-3 py-2 rounded-xl transition">
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+                        <table class="w-full text-left text-xs min-w-[640px]">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="py-3 px-4">Customer Name</th>
+                                    <th class="py-3 px-4">Contact Details</th>
+                                    <th class="py-3 px-4">Property Context</th>
+                                    <th class="py-3 px-4">Captured Date</th>
+                                    <th class="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTableBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic Leads Data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Owner Admin Tab 3: Manage Listings -->
+                <div id="ocontent-listings" class="ocontent-block hidden space-y-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800 text-sm">Your Property Portfolio</h3>
+                        <button onclick="openAddPropertyModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Add Property
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="ownerPropertyList">
+                        <!-- Dynamic Owner Listings -->
+                    </div>
+                </div>
+
+                <!-- Owner Admin Tab 4: Settings & Password Change -->
+                <div id="ocontent-settings" class="ocontent-block hidden max-w-xl mx-auto">
+                    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                        <h3 class="font-extrabold text-slate-900 text-base mb-1">Owner Profile & Password Settings</h3>
+                        <p class="text-slate-500 text-xs mb-6">Update contact details displayed to customers or change your owner workspace password.</p>
+
+                        <form onsubmit="saveOwnerSettings(event)" class="space-y-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Owner Display Name *</label>
+                                <input type="text" id="setOwnerName" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">WhatsApp Phone Number *</label>
+                                    <input type="text" id="setOwnerPhone" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Email Address *</label>
+                                    <input type="email" id="setOwnerEmail" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Photo Image URL</label>
+                                <input type="url" id="setOwnerPic" required class="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Owner Bio</label>
+                                <textarea id="setOwnerBio" rows="3" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600/20 focus:outline-none"></textarea>
+                            </div>
+
+                            <hr class="my-4 border-slate-100">
+
+                            <!-- Change Password Field -->
+                            <div>
+                                <label class="block font-bold text-slate-900 mb-1">Change Owner Password / PIN *</label>
+                                <div class="relative">
+                                    <input type="password" id="setOwnerPin" required class="w-full pl-3.5 pr-10 py-2 border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-600/30 focus:outline-none font-mono">
+                                    <button type="button" onclick="togglePasswordVisibility('setOwnerPin', 'eyeIconSet')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                        <i class="fa-solid fa-eye text-xs" id="eyeIconSet"></i>
+                                    </button>
+                                </div>
+                                <span class="text-[10px] text-slate-400 mt-1 block">Used for logging into the Owner Workspace.</span>
+                            </div>
+
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-md">
+                                <i class="fa-solid fa-floppy-disk mr-1.5"></i> Save Profile & Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-white font-bold text-base">YourHome Portal</span>
+                        <span class="text-emerald-400 text-[10px] font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">Verified Direct Listings</span>
+                    </div>
+                    <p class="mt-1 text-slate-400 text-xs">Direct property dealing in Indian Rupees (₹). Zero commission.</p>
+                </div>
+
+                <!-- Footer Mode Switch Button -->
+                <div class="flex items-center space-x-3 bg-slate-800 p-2.5 rounded-2xl border border-slate-700">
+                    <span class="text-slate-300 text-xs font-medium pl-2 hidden sm:inline">Owner Access?</span>
+                    <button onclick="openSecretLogin()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-md flex items-center space-x-2">
+                        <i class="fa-solid fa-lock text-emerald-200"></i>
+                        <span>🔒 Owner Login</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 gap-2">
+                <div>&copy; <span id="yearSpan"></span> YourHome Real Estate Portal. All rights reserved.</div>
+                <div class="text-slate-600">Shortcuts: Footer Button | Header Switch | Ctrl+Shift+O</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- CUSTOMER PROPERTY DETAIL VIEW & GALLERY MODAL -->
+    <div id="propertyDetailModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 relative my-auto custom-scrollbar">
+            <button onclick="closeModal('propertyDetailModal')" class="absolute top-4 right-4 z-20 bg-slate-900/60 hover:bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+
+            <div id="modalPropertyDetailContent">
+                <!-- Dynamically Inserted Property Details & Image Gallery -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SECURE OWNER LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Owner Workspace Access</h3>
+                <p class="text-slate-500 text-xs mt-1">Enter password to switch into owner mode.</p>
+            </div>
+
+            <form onsubmit="handleOwnerLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Owner Password</label>
+                    <div class="relative">
+                        <input type="password" id="loginPinInput" required placeholder="••••••••" class="w-full pl-3.5 pr-10 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono">
+                        <button type="button" onclick="togglePasswordVisibility('loginPinInput', 'eyeIconLogin')" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-eye text-xs" id="eyeIconLogin"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loginErrorMsg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl font-medium border border-red-100 text-center"></div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md text-xs">
+                    Unlock Owner Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOMER LEAD CAPTURE MODAL -->
+    <div id="leadModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
+            <button onclick="closeModal('leadModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="mb-4">
+                <span id="modalLeadBadge" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Contact Request</span>
+                <h3 class="text-lg font-bold text-slate-900 mt-1" id="modalLeadTitle">Inquire About Property</h3>
+                <p class="text-slate-500 text-xs" id="modalLeadSubtext">Enter your details so the owner can connect with you directly.</p>
+            </div>
+
+            <form onsubmit="handleLeadSubmit(event)" class="space-y-3">
+                <input type="hidden" id="leadContextProperty">
+                <input type="hidden" id="leadActionType">
+                <input type="hidden" id="leadTargetImageIndex">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name *</label>
+                    <input type="text" id="leadCustomerName" required placeholder="e.g. Ramesh Kumar" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile / WhatsApp Number *</label>
+                    <input type="tel" id="leadCustomerPhone" required placeholder="+91 98765 43210" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                    <input type="email" id="leadCustomerEmail" placeholder="ramesh@example.com" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Note / Preferred Site Visit Time</label>
+                    <textarea id="leadCustomerNote" rows="2" placeholder="e.g. Looking for additional images & weekend site visit..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600/20 focus:outline-none"></textarea>
+                </div>
+                <button type="submit" id="leadSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md text-xs">
+                    Submit Details & Unlock Full Gallery
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT PROPERTY MODAL -->
+    <div id="propertyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8 relative">
+            <button onclick="closeModal('propertyModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-slate-900 mb-4" id="propModalTitle">Add Property Listing</h3>
+            <form onsubmit="handlePropertySave(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="propEditId">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Property Title *</label>
+                    <input type="text" id="propTitle" required placeholder="e.g. 3 BHK Luxury Villa with Private Pool" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Type</label>
+                        <select id="propType" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                            <option value="Apartment">Apartment</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Penthouse">Penthouse</option>
+                            <option value="Plot">Plot / Land</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Listing For</label>
+                        <select id="propPurpose" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                            <option value="Sale">Sale</option>
+                            <option value="Rent">Rent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Price in Rupees (₹) *</label>
+                        <input type="number" id="propPrice" required placeholder="e.g. 15000000 for 1.5 Cr" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">City / Area *</label>
+                        <input type="text" id="propLocation" required placeholder="e.g. Bengaluru" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Bedrooms</label>
+                        <input type="number" id="propBeds" value="3" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Bathrooms</label>
+                        <input type="number" id="propBaths" value="2" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Area (Sq.Ft)</label>
+                        <input type="number" id="propSqft" value="1800" class="w-full px-3 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Property Images (1 per line or comma separated) *</label>
+                    <textarea id="propImagesUrls" rows="3" required placeholder="https://images.unsplash.com/photo-1...&#10;https://images.unsplash.com/photo-2...&#10;https://images.unsplash.com/photo-3..." class="w-full px-3 py-2 border border-slate-200 rounded-xl font-mono text-[11px]"></textarea>
+                    <span class="text-[10px] text-slate-400">Add 3+ image URLs so customers get prompted to submit query details to view more than 2 images!</span>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Description</label>
+                    <textarea id="propDescription" rows="3" placeholder="Key highlights, amenities, location advantages..." class="w-full px-3 py-2 border border-slate-200 rounded-xl"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md">
+                    Save Property Listing
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Seed Initial Data
+        const DEFAULT_PROPERTIES = [
+            {
+                id: "prop-1",
+                title: "4 BHK Luxury Villa with Private Garden",
+                type: "Villa",
+                purpose: "Sale",
+                price: 28500000, // ₹2.85 Crore
+                location: "Indiranagar, Bengaluru",
+                beds: 4,
+                baths: 4,
+                sqft: 3400,
+                images: [
+                    "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+                ],
+                description: "Modern architectural masterpiece featuring Italian marble flooring, lush private landscaped garden, smart home automation, high ceilings, and double-height living spaces."
+            },
+            {
+                id: "prop-2",
+                title: "3 BHK Sea View Penthouse Deck",
+                type: "Penthouse",
+                purpose: "Sale",
+                price: 45000000, // ₹4.50 Crore
+                location: "Bandra West, Mumbai",
+                beds: 3,
+                baths: 3,
+                sqft: 2200,
+                images: [
+                    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1200&q=80"
+                ],
+                description: "Uninterrupted Arabian Sea panoramic views, sun-lit open plan kitchen, custom hardwood floor deck, private elevator access, and 24/7 concierge."
+            },
+            {
+                id: "prop-3",
+                title: "2 BHK Gated Apartment near Tech Park",
+                type: "Apartment",
+                purpose: "Rent",
+                price: 55000, // ₹55,000 / month
+                location: "Gachibowli, Hyderabad",
+                beds: 2,
+                baths: 2,
+                sqft: 1250,
+                images: [
+                    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+                    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80"
+                ],
+                description: "Fully furnished modern gated community flat with modular kitchen, private balcony, Olympic size pool, gym, and underground parking."
+            }
+        ];
+
+        const DEFAULT_OWNER = {
+            name: "Rajesh V. Sharma",
+            phone: "+91 98765 43210",
+            email: "rajesh.sharma@yourhome.in",
+            bio: "Direct property owner offering verified premium residential spaces in top metro cities across India.",
+            pic: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
+            pin: "owner123"
+        };
+
+        const DEFAULT_LEADS = [
+            {
+                id: "lead-1",
+                customerName: "Ananya Roy",
+                customerPhone: "+91 99887 76655",
+                customerEmail: "ananya@example.com",
+                note: "Interested in weekend site visit for the 4 BHK Villa.",
+                context: "4 BHK Luxury Villa",
+                date: "11 Oct 2026"
+            }
+        ];
+
+        // Reactive Application State
+        let properties = JSON.parse(localStorage.getItem('yh_properties')) || DEFAULT_PROPERTIES;
+        let ownerProfile = JSON.parse(localStorage.getItem('yh_owner')) || DEFAULT_OWNER;
+        let customerLeads = JSON.parse(localStorage.getItem('yh_leads')) || DEFAULT_LEADS;
+        let isOwnerLoggedIn = localStorage.getItem('yh_owner_auth') === 'true';
+
+        // Property Modal State & Lead Unlocking State
+        let currentDetailProperty = null;
+        let currentImageIndex = 0;
+        let unlockedProperties = JSON.parse(localStorage.getItem('yh_unlocked_props')) || {};
+
+        /* Indian Rupee (₹) Formatting Helper */
+        function formatINR(price, purpose = '') {
+            if (purpose === 'Rent') {
+                return `₹${price.toLocaleString('en-IN')}/mo`;
+            }
+            if (price >= 10000000) {
+                const cr = (price / 10000000).toFixed(2).replace(/\.00$/, '');
+                return `₹${cr} Crore`;
+            } else if (price >= 100000) {
+                const lakh = (price / 100000).toFixed(2).replace(/\.00$/, '');
+                return `₹${lakh} Lakh`;
+            }
+            return `₹${price.toLocaleString('en-IN')}`;
+        }
+
+        /* Password Input Visibility Toggle */
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        /* Owner Login Modal */
+        function openSecretLogin() {
+            if (isOwnerLoggedIn) {
+                switchMainView('owner');
+            } else {
+                document.getElementById('loginErrorMsg').classList.add('hidden');
+                document.getElementById('loginPinInput').value = '';
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+
+        function handleOwnerLogin(event) {
+            event.preventDefault();
+            const enteredPin = document.getElementById('loginPinInput').value;
+            if (enteredPin === ownerProfile.pin) {
+                isOwnerLoggedIn = true;
+                localStorage.setItem('yh_owner_auth', 'true');
+                closeModal('loginModal');
+                switchMainView('owner');
+            } else {
+                const err = document.getElementById('loginErrorMsg');
+                err.textContent = 'Invalid Password. Please try again.';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function logoutOwner() {
+            isOwnerLoggedIn = false;
+            localStorage.setItem('yh_owner_auth', 'false');
+            switchMainView('customer');
+        }
+
+        /* Keyboard Shortcut: Ctrl + Shift + O */
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'O' || e.key === 'o')) {
+                e.preventDefault();
+                openSecretLogin();
+            }
+        });
+
+        /* View Switching: Customer View vs. Owner Workspace View */
+        function switchMainView(viewMode) {
+            const custView = document.getElementById('customerView');
+            const ownerView = document.getElementById('ownerWorkspaceView');
+            const custSwitchBtn = document.getElementById('customerSwitchBtn');
+            const ownerSwitchBtn = document.getElementById('ownerSwitchBtn');
+            const modeBadge = document.getElementById('modeBadge');
+            const modeDesc = document.getElementById('modeDescription');
+            const custNav = document.getElementById('customerNav');
+            const ownerTitle = document.getElementById('ownerNavTitle');
+
+            if (viewMode === 'owner' && isOwnerLoggedIn) {
+                custView.classList.add('hidden');
+                ownerView.classList.remove('hidden');
+                custSwitchBtn.classList.add('hidden');
+                ownerSwitchBtn.classList.remove('hidden');
+                custNav.classList.add('hidden');
+                ownerTitle.classList.remove('hidden');
+
+                modeBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30';
+                modeBadge.innerHTML = '<i class="fa-solid fa-lock mr-1 text-[9px]"></i> Owner Workspace';
+                modeDesc.textContent = 'Protected Management Portal';
+
+                renderOwnerWorkspaceData();
+            } else {
+                ownerView.classList.add('hidden');
+                custView.classList.remove('hidden');
+                ownerSwitchBtn.classList.add('hidden');
+                custSwitchBtn.classList.remove('hidden');
+                ownerTitle.classList.add('hidden');
+                custNav.classList.remove('hidden');
+
+                modeBadge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                modeBadge.innerHTML = '<i class="fa-solid fa-user-tag mr-1 text-[9px]"></i> Customer View';
+                modeDesc.textContent = 'Direct owner properties • Prices in INR (₹)';
+
+                switchCustomerTab('browse');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* Customer Navigation Tabs */
+        function switchCustomerTab(tab) {
+            document.querySelectorAll('.ctab-content').forEach(el => el.classList.add('hidden'));
+
+            ['browse', 'owner-profile', 'contact'].forEach(id => {
+                const btn = document.getElementById(`nav-c-${id}`);
+                if (btn) {
+                    if (id === tab) {
+                        btn.classList.add('text-emerald-600', 'border-emerald-600', 'font-bold');
+                        btn.classList.remove('text-slate-600', 'border-transparent');
+                    } else {
+                        btn.classList.remove('text-emerald-600', 'border-emerald-600', 'font-bold');
+                        btn.classList.add('text-slate-600', 'border-transparent');
+                    }
+                }
+            });
+
+            document.getElementById(`ctab-${tab}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* Owner Navigation Admin Sub-Tabs */
+        function switchOwnerTab(tab) {
+            ['overview', 'leads', 'listings', 'settings'].forEach(st => {
+                const btn = document.getElementById(`otab-${st}`);
+                const block = document.getElementById(`ocontent-${st}`);
+                if (st === tab) {
+                    btn.classList.add('bg-emerald-600', 'text-white');
+                    btn.classList.remove('text-slate-600');
+                    block.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('bg-emerald-600', 'text-white');
+                    btn.classList.add('text-slate-600');
+                    block.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderCustomerProperties() {
+            const grid = document.getElementById('customerPropertyGrid');
+            const searchVal = document.getElementById('filterSearch').value.toLowerCase();
+            const typeVal = document.getElementById('filterType').value;
+            const purposeVal = document.getElementById('filterPurpose').value;
+            const budgetVal = document.getElementById('filterBudget').value;
+
+            const filtered = properties.filter(p => {
+                const matchSearch = p.title.toLowerCase().includes(searchVal) || p.location.toLowerCase().includes(searchVal);
+                const matchType = typeVal === 'ALL' || p.type === typeVal;
+                const matchPurpose = purposeVal === 'ALL' || p.purpose === purposeVal;
+
+                let matchBudget = true;
+                if (budgetVal !== 'ALL') {
+                    const [min, max] = budgetVal.split('-').map(Number);
+                    matchBudget = p.price >= min && p.price <= max;
+                }
+                return matchSearch && matchType && matchPurpose && matchBudget;
+            });
+
+            document.getElementById('propertyCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
+                        <p class="text-xs font-semibold text-slate-500">No properties found matching your filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const imgList = (p.images && p.images.length > 0) ? p.images : [p.image || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"];
+                const firstImg = imgList[0];
+                const totalImgs = imgList.length;
+
+                return `
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+                    <div>
+                        <div class="relative h-52 bg-slate-100 overflow-hidden cursor-pointer" onclick="openPropertyDetailModal('${p.id}')">
+                            <img src="${firstImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <span class="bg-slate-900/80 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${p.purpose}</span>
+                                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${p.type}</span>
+                            </div>
+                            <div class="absolute bottom-3 right-3 bg-slate-900/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center backdrop-blur-sm">
+                                <i class="fa-solid fa-images mr-1.5 text-amber-400"></i> ${totalImgs} Photos
+                            </div>
+                        </div>
+                        <div class="p-4 cursor-pointer" onclick="openPropertyDetailModal('${p.id}')">
+                            <div class="text-xl font-black text-emerald-700 mb-1">${formatINR(p.price, p.purpose)}</div>
+                            <h3 class="font-extrabold text-slate-900 text-sm line-clamp-1 mb-1 group-hover:text-emerald-600 transition">${p.title}</h3>
+                            <p class="text-slate-500 text-xs mb-3"><i class="fa-solid fa-location-dot text-emerald-600 mr-1"></i> ${p.location}</p>
+                            <div class="flex justify-between py-2 px-3 bg-slate-50 rounded-xl text-slate-600 text-[11px] mb-2 font-medium">
+                                <span><i class="fa-solid fa-bed text-emerald-600 mr-1"></i> ${p.beds || '-'} Beds</span>
+                                <span><i class="fa-solid fa-bath text-emerald-600 mr-1"></i> ${p.baths || '-'} Baths</span>
+                                <span>${p.sqft} Sq.Ft</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex gap-2">
+                        <button onclick="openPropertyDetailModal('${p.id}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center">
+                            <i class="fa-solid fa-eye mr-1.5"></i> View Details
+                        </button>
+                        <button onclick="openLeadModal('WhatsApp Chat', '${p.title.replace(/'/g, "\\'")}')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3.5 py-2.5 rounded-xl transition shadow-sm flex items-center justify-center" title="WhatsApp Owner">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function applyFilters() { renderCustomerProperties(); }
+
+        /* PROPERTY DETAIL MODAL WITH 2-IMAGE FREE PREVIEW & QUERY DETAILS GATING */
+        function openPropertyDetailModal(propId) {
+            currentDetailProperty = properties.find(p => p.id === propId);
+            if (!currentDetailProperty) return;
+
+            currentImageIndex = 0;
+            renderPropertyDetailModal();
+            document.getElementById('propertyDetailModal').classList.remove('hidden');
+        }
+
+        function renderPropertyDetailModal() {
+            const p = currentDetailProperty;
+            const images = (p.images && p.images.length > 0) ? p.images : [p.image];
+            const isUnlocked = isOwnerLoggedIn || unlockedProperties[p.id] === true;
+
+            const content = document.getElementById('modalPropertyDetailContent');
+
+            content.innerHTML = `
+                <div class="p-6 sm:p-8">
+                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4 pr-8">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${p.purpose}</span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${p.type}</span>
+                                ${isUnlocked ? '<span class="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-lock-open mr-1"></i> Gallery Unlocked</span>' : ''}
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">${p.title}</h2>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot text-emerald-600 mr-1"></i> ${p.location}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-700">${formatINR(p.price, p.purpose)}</div>
+                            <span class="text-[10px] text-slate-400 font-medium">Direct Owner Pricing</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Active Image Viewer -->
+                    <div class="relative h-64 sm:h-96 bg-slate-950 rounded-2xl overflow-hidden mb-4 group border border-slate-200">
+                        <img id="mainGalleryImage" src="${images[currentImageIndex]}" class="w-full h-full object-cover transition-all duration-300">
+                        
+                        <!-- Prev / Next Arrow Navigation -->
+                        ${images.length > 1 ? `
+                            <button onclick="navigateGallery(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/60 hover:bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button onclick="navigateGallery(1)" class="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/60 hover:bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        ` : ''}
+
+                        <!-- Image Counter Badge -->
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
+                            Photo <span id="galleryIndexText">${currentImageIndex + 1}</span> of ${images.length}
+                        </div>
+                    </div>
+
+                    <!-- Thumbnails Row (2 Images Unlocked Free, Remainder Gated) -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-700">Property Photos Preview</span>
+                            <span class="text-[11px] text-amber-600 font-semibold">
+                                ${isUnlocked ? 'All images unlocked' : 'Free Preview: 2 Images • Enter Query to Unlock More'}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                            ${images.map((imgUrl, idx) => {
+                                const isGated = idx >= 2 && !isUnlocked;
+                                return `
+                                    <div onclick="selectGalleryThumbnail(${idx})" class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 border-2 cursor-pointer transition ${currentImageIndex === idx ? 'border-emerald-600 ring-2 ring-emerald-600/30' : 'border-slate-200 hover:border-slate-400'}">
+                                        <img src="${imgUrl}" class="w-full h-full object-cover ${isGated ? 'blur-[2px] opacity-60' : ''}">
+                                        ${isGated ? `
+                                            <div class="absolute inset-0 bg-slate-900/50 flex flex-col items-center justify-center text-white text-[9px] font-bold text-center p-1">
+                                                <i class="fa-solid fa-lock text-amber-400 text-xs mb-1"></i>
+                                                <span>Query Needed</span>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Specification Grid -->
+                    <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6 text-center text-xs">
+                        <div>
+                            <span class="block text-slate-400 text-[10px] uppercase font-bold">Bedrooms</span>
+                            <span class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-bed text-emerald-600 mr-1"></i> ${p.beds || '-'} BHK</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[10px] uppercase font-bold">Bathrooms</span>
+                            <span class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-bath text-emerald-600 mr-1"></i> ${p.baths || '-'} Baths</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 text-[10px] uppercase font-bold">Total Area</span>
+                            <span class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-ruler-combined text-emerald-600 mr-1"></i> ${p.sqft} Sq.Ft</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-slate-900 text-xs uppercase text-slate-400 mb-1">Property Description</h4>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">${p.description || 'No description provided.'}</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-slate-100">
+                        ${!isUnlocked && images.length > 2 ? `
+                            <button onclick="promptUnlockGallery('${p.id}')" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-md flex items-center justify-center">
+                                <i class="fa-solid fa-lock-open mr-2"></i> Enter Query Details to View All ${images.length} Photos
+                            </button>
+                        ` : ''}
+                        <button onclick="openLeadModal('Book Site Visit', '${p.title.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-md flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-check mr-2"></i> Book Site Visit
+                        </button>
+                        <button onclick="openLeadModal('WhatsApp Chat', '${p.title.replace(/'/g, "\\'")}')" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition shadow-md flex items-center justify-center">
+                            <i class="fa-brands fa-whatsapp text-base mr-2"></i> Chat on WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* Gallery Thumbnail & Arrow Handler with Lead Capturing Trigger */
+        function selectGalleryThumbnail(idx) {
+            const p = currentDetailProperty;
+            if (!p) return;
+
+            const isUnlocked = isOwnerLoggedIn || unlockedProperties[p.id] === true;
+
+            if (idx >= 2 && !isUnlocked) {
+                promptUnlockGallery(p.id, idx);
+            } else {
+                currentImageIndex = idx;
+                renderPropertyDetailModal();
+            }
+        }
+
+        function navigateGallery(direction) {
+            const p = currentDetailProperty;
+            if (!p) return;
+
+            const images = (p.images && p.images.length > 0) ? p.images : [p.image];
+            const isUnlocked = isOwnerLoggedIn || unlockedProperties[p.id] === true;
+
+            const nextIndex = currentImageIndex + direction;
+
+            if (nextIndex < 0 || nextIndex >= images.length) return;
+
+            if (nextIndex >= 2 && !isUnlocked) {
+                promptUnlockGallery(p.id, nextIndex);
+            } else {
+                currentImageIndex = nextIndex;
+                renderPropertyDetailModal();
+            }
+        }
+
+        /* Lead Capture Prompt overlay for viewing >2 images */
+        function promptUnlockGallery(propId, targetIdx = 2) {
+            const p = properties.find(item => item.id === propId);
+            const pTitle = p ? p.title : 'Property Gallery';
+
+            document.getElementById('leadActionType').value = 'Unlock Gallery';
+            document.getElementById('leadContextProperty').value = pTitle;
+            document.getElementById('leadTargetImageIndex').value = targetIdx;
+
+            document.getElementById('modalLeadBadge').textContent = '🔒 Image Gallery Locked';
+            document.getElementById('modalLeadTitle').textContent = 'Enter Query Details to View All Images';
+            document.getElementById('modalLeadSubtext').textContent = 'Free preview covers 2 images. Please enter your query details below to unlock all remaining photos.';
+            document.getElementById('leadSubmitBtn').textContent = 'Submit Query & Unlock Photos';
+
+            document.getElementById('leadModal').classList.remove('hidden');
+        }
+
+        function renderPublicOwnerProfile() {
+            document.getElementById('heroOwnerName').textContent = ownerProfile.name;
+            document.getElementById('pubOwnerName').textContent = ownerProfile.name;
+            document.getElementById('pubOwnerBio').textContent = ownerProfile.bio;
+            document.getElementById('pubOwnerEmail').textContent = ownerProfile.email;
+            document.getElementById('pubOwnerPhoneLink').textContent = ownerProfile.phone;
+            document.getElementById('pubOwnerPhoneLink').href = `tel:${ownerProfile.phone}`;
+            document.getElementById('pubOwnerPic').src = ownerProfile.pic;
+        }
+
+        function openLeadModal(actionType, context) {
+            document.getElementById('leadActionType').value = actionType;
+            document.getElementById('leadContextProperty').value = context;
+            document.getElementById('leadTargetImageIndex').value = '';
+
+            document.getElementById('modalLeadBadge').textContent = actionType;
+            document.getElementById('modalLeadTitle').textContent = actionType === 'Book Site Visit' ? 'Schedule Site Visit' : 'Contact Owner';
+            document.getElementById('modalLeadSubtext').textContent = 'Enter your details so the owner can connect with you directly.';
+            document.getElementById('leadSubmitBtn').textContent = 'Submit Contact Details';
+
+            document.getElementById('leadModal').classList.remove('hidden');
+        }
+
+        function handleLeadSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('leadCustomerName').value;
+            const phone = document.getElementById('leadCustomerPhone').value;
+            const email = document.getElementById('leadCustomerEmail').value;
+            const note = document.getElementById('leadCustomerNote').value;
+            const context = document.getElementById('leadContextProperty').value;
+            const action = document.getElementById('leadActionType').value;
+            const targetIdx = document.getElementById('leadTargetImageIndex').value;
+
+            const newLead = {
+                id: 'lead-' + Date.now(),
+                customerName: name,
+                customerPhone: phone,
+                customerEmail: email || 'Not provided',
+                note: note || (action === 'Unlock Gallery' ? 'Customer unlocked full image gallery' : 'General property inquiry'),
+                context: context || 'Direct Customer Lead',
+                date: new Date().toLocaleDateString('en-IN')
+            };
+
+            customerLeads.unshift(newLead);
+            localStorage.setItem('yh_leads', JSON.stringify(customerLeads));
+            closeModal('leadModal');
+
+            if (currentDetailProperty) {
+                unlockedProperties[currentDetailProperty.id] = true;
+                localStorage.setItem('yh_unlocked_props', JSON.stringify(unlockedProperties));
+            }
+
+            if (action === 'Unlock Gallery' && currentDetailProperty) {
+                currentImageIndex = targetIdx !== '' ? Number(targetIdx) : 2;
+                renderPropertyDetailModal();
+                alert(`Thank you, ${name}! Full image gallery is now unlocked.`);
+            } else if (action === 'WhatsApp Chat') {
+                const waMsg = encodeURIComponent(`Hello ${ownerProfile.name}, I am interested in "${context}". Name: ${name}, Phone: ${phone}. ${note}`);
+                const cleanPhone = ownerProfile.phone.replace(/[^0-9]/g, '');
+                window.open(`https://wa.me/${cleanPhone}?text=${waMsg}`, '_blank');
+            } else {
+                alert(`Thank you ${name}! Your query details have been captured for the owner.`);
+            }
+
+            document.getElementById('leadCustomerName').value = '';
+            document.getElementById('leadCustomerPhone').value = '';
+            document.getElementById('leadCustomerEmail').value = '';
+            document.getElementById('leadCustomerNote').value = '';
+        }
+
+        function openWhatsAppDirect() {
+            openLeadModal('WhatsApp Chat', 'Direct Owner Consultation');
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('contactName').value;
+            const phone = document.getElementById('contactPhone').value;
+            const email = document.getElementById('contactEmail').value;
+            const msg = document.getElementById('contactMessage').value;
+
+            customerLeads.unshift({
+                id: 'lead-' + Date.now(),
+                customerName: name,
+                customerPhone: phone,
+                customerEmail: email || 'Not provided',
+                note: msg || 'Contact Form Submission',
+                context: 'Contact Page Form',
+                date: new Date().toLocaleDateString('en-IN')
+            });
+            localStorage.setItem('yh_leads', JSON.stringify(customerLeads));
+            alert('Your query details have been sent to the owner!');
+            e.target.reset();
+        }
+
+        /* Owner Workspace Data Rendering */
+        function renderOwnerWorkspaceData() {
+            document.getElementById('statTotalProps').textContent = properties.length;
+            document.getElementById('statTotalLeads').textContent = customerLeads.length;
+            document.getElementById('statSaleProps').textContent = properties.filter(p => p.purpose === 'Sale').length;
+            document.getElementById('statRentProps').textContent = properties.filter(p => p.purpose === 'Rent').length;
+
+            document.getElementById('dashLeadBadge').textContent = customerLeads.length;
+            document.getElementById('dashPropBadge').textContent = properties.length;
+
+            renderLeadsTable();
+            renderOwnerListingsGrid();
+            populateSettingsForm();
+        }
+
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadsTableBody');
+            const search = document.getElementById('leadSearch').value.toLowerCase();
+            const filtered = customerLeads.filter(l => l.customerName.toLowerCase().includes(search) || l.customerPhone.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">No leads captured yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(l => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4 font-bold text-slate-900">${l.customerName}</td>
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-emerald-700">${l.customerPhone}</div>
+                        <div class="text-[10px] text-slate-400">${l.customerEmail}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="font-semibold text-slate-800">${l.context}</div>
+                        <div class="text-[10px] text-slate-500 italic max-w-xs truncate">${l.note}</div>
+                    </td>
+                    <td class="py-3 px-4 text-slate-500 text-[11px]">${l.date}</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <a href="tel:${l.customerPhone}" class="text-emerald-600 font-bold p-1" title="Call Customer"><i class="fa-solid fa-phone"></i></a>
+                        <button onclick="deleteLead('${l.id}')" class="text-red-500 p-1" title="Delete Lead"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteLead(id) {
+            customerLeads = customerLeads.filter(l => l.id !== id);
+            localStorage.setItem('yh_leads', JSON.stringify(customerLeads));
+            renderOwnerWorkspaceData();
+        }
+
+        function clearAllLeads() {
+            if (!confirm('Are you sure you want to clear all captured customer leads?')) return;
+            customerLeads = [];
+            localStorage.setItem('yh_leads', JSON.stringify(customerLeads));
+            renderOwnerWorkspaceData();
+        }
+
+        function exportLeadsCSV() {
+            if (customerLeads.length === 0) return alert('No leads available to export');
+            let csv = 'Name,Phone,Email,Context,Note,Date\n';
+            customerLeads.forEach(l => {
+                csv += `"${l.customerName}","${l.customerPhone}","${l.customerEmail}","${l.context}","${l.note}","${l.date}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Captured_Customer_Leads.csv`;
+            a.click();
+        }
+
+        function renderOwnerListingsGrid() {
+            const container = document.getElementById('ownerPropertyList');
+            container.innerHTML = properties.map(p => {
+                const firstImg = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80");
+                return `
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm p-4 flex flex-col justify-between">
+                    <div>
+                        <img src="${firstImg}" class="w-full h-36 object-cover rounded-xl mb-3">
+                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">${p.purpose} • ${p.type}</span>
+                        <h4 class="font-extrabold text-slate-900 text-sm mt-1">${p.title}</h4>
+                        <div class="text-base font-black text-emerald-700 my-1">${formatINR(p.price, p.purpose)}</div>
+                        <p class="text-slate-400 text-[11px]"><i class="fa-solid fa-location-dot mr-1"></i>${p.location}</p>
+                    </div>
+                    <div class="flex gap-2 pt-3 mt-3 border-t border-slate-100">
+                        <button onclick="editProperty('${p.id}')" class="flex-1 bg-slate-100 text-slate-700 text-xs py-2 rounded-xl font-bold hover:bg-slate-200 transition">Edit</button>
+                        <button onclick="deleteProperty('${p.id}')" class="bg-red-50 text-red-600 text-xs px-3 py-2 rounded-xl font-bold hover:bg-red-100 transition">Delete</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function openAddPropertyModal() {
+            document.getElementById('propEditId').value = '';
+            document.getElementById('propModalTitle').textContent = 'Add Property Listing';
+            document.getElementById('propTitle').value = '';
+            document.getElementById('propPrice').value = '';
+            document.getElementById('propLocation').value = '';
+            document.getElementById('propImagesUrls').value = `https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80\nhttps://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80\nhttps://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80`;
+            document.getElementById('propDescription').value = '';
+            document.getElementById('propertyModal').classList.remove('hidden');
+        }
+
+        function editProperty(id) {
+            const p = properties.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('propEditId').value = p.id;
+            document.getElementById('propModalTitle').textContent = 'Edit Property Listing';
+            document.getElementById('propTitle').value = p.title;
+            document.getElementById('propType').value = p.type;
+            document.getElementById('propPurpose').value = p.purpose;
+            document.getElementById('propPrice').value = p.price;
+            document.getElementById('propLocation').value = p.location;
+            document.getElementById('propBeds').value = p.beds;
+            document.getElementById('propBaths').value = p.baths;
+            document.getElementById('propSqft').value = p.sqft;
+            
+            const rawImgs = (p.images && p.images.length > 0) ? p.images.join('\n') : (p.image || '');
+            document.getElementById('propImagesUrls').value = rawImgs;
+            document.getElementById('propDescription').value = p.description || '';
+            document.getElementById('propertyModal').classList.remove('hidden');
+        }
+
+        function handlePropertySave(e) {
+            e.preventDefault();
+            const editId = document.getElementById('propEditId').value;
+            const rawImgsText = document.getElementById('propImagesUrls').value;
+            
+            const imgArray = rawImgsText.split(/[\n,]+/).map(url => url.trim()).filter(url => url.length > 0);
+
+            const newProp = {
+                id: editId || 'prop-' + Date.now(),
+                title: document.getElementById('propTitle').value,
+                type: document.getElementById('propType').value,
+                purpose: document.getElementById('propPurpose').value,
+                price: Number(document.getElementById('propPrice').value),
+                location: document.getElementById('propLocation').value,
+                beds: Number(document.getElementById('propBeds').value),
+                baths: Number(document.getElementById('propBaths').value),
+                sqft: Number(document.getElementById('propSqft').value),
+                images: imgArray.length > 0 ? imgArray : ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"],
+                image: imgArray[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+                description: document.getElementById('propDescription').value
+            };
+
+            if (editId) {
+                const idx = properties.findIndex(p => p.id === editId);
+                if (idx !== -1) properties[idx] = newProp;
+            } else {
+                properties.unshift(newProp);
+            }
+
+            localStorage.setItem('yh_properties', JSON.stringify(properties));
+            closeModal('propertyModal');
+            renderCustomerProperties();
+            renderOwnerWorkspaceData();
+        }
+
+        function deleteProperty(id) {
+            if (!confirm('Are you sure you want to delete this property listing?')) return;
+            properties = properties.filter(p => p.id !== id);
+            localStorage.setItem('yh_properties', JSON.stringify(properties));
+            renderCustomerProperties();
+            renderOwnerWorkspaceData();
+        }
+
+        function populateSettingsForm() {
+            document.getElementById('setOwnerName').value = ownerProfile.name;
+            document.getElementById('setOwnerPhone').value = ownerProfile.phone;
+            document.getElementById('setOwnerEmail').value = ownerProfile.email;
+            document.getElementById('setOwnerPic').value = ownerProfile.pic;
+            document.getElementById('setOwnerBio').value = ownerProfile.bio;
+            document.getElementById('setOwnerPin').value = ownerProfile.pin;
+        }
+
+        function saveOwnerSettings(e) {
+            e.preventDefault();
+            ownerProfile.name = document.getElementById('setOwnerName').value;
+            ownerProfile.phone = document.getElementById('setOwnerPhone').value;
+            ownerProfile.email = document.getElementById('setOwnerEmail').value;
+            ownerProfile.pic = document.getElementById('setOwnerPic').value;
+            ownerProfile.bio = document.getElementById('setOwnerBio').value;
+            ownerProfile.pin = document.getElementById('setOwnerPin').value;
+
+            localStorage.setItem('yh_owner', JSON.stringify(ownerProfile));
+            renderPublicOwnerProfile();
+            alert('Owner profile and password successfully updated!');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        window.onload = function() {
+            document.getElementById('yearSpan').textContent = new Date().getFullYear();
+            renderCustomerProperties();
+            renderPublicOwnerProfile();
+            
+            if (isOwnerLoggedIn) {
+                switchMainView('owner');
+            } else {
+                switchMainView('customer');
+            }
+        };
+    </script>
+</body>
+</html>
